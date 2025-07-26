@@ -3,7 +3,7 @@
 [![Gem Version](https://badge.fury.io/rb/rails-index-now.svg)](https://badge.fury.io/rb/rails-index-now)
 [![Build Status](https://github.com/aleksdavtian/rails-index-now/workflows/CI/badge.svg)](https://github.com/aleksdavtian/rails-index-now/actions)
 
-A modern, lightweight Rails gem for seamless integration with Microsoft's IndexNow protocol. Get your content indexed by search engines instantly, without waiting for crawlers.
+A modern, plug-and-play Rails Engine for seamless integration with Microsoft's IndexNow protocol. Get your content indexed by search engines instantly, with automatic API key verification and zero manual configuration.
 
 ## What is IndexNow?
 
@@ -18,6 +18,13 @@ A modern, lightweight Rails gem for seamless integration with Microsoft's IndexN
 - **Free**: The IndexNow protocol is completely free to use
 
 Traditional search engine indexing relies on crawlers periodically visiting your site. With IndexNow, you proactively tell search engines exactly what has changed, when it changed, making the indexing process nearly instantaneous.
+
+### Why This Rails Engine?
+
+- **🚀 Plug-and-Play**: No manual controller or route setup required
+- **🔐 Automatic Verification**: The engine automatically serves your API key file at the correct URL
+- **⚡ Zero Configuration**: Just add the gem, run the generator, and you're ready
+- **🛡️ Production Ready**: Built-in error handling, logging, and environment controls
 
 ## Installation
 
@@ -39,41 +46,58 @@ Or install it yourself as:
 gem install rails-index-now
 ```
 
-## Configuration
+## Quick Setup
 
-Generate the initializer file:
+### 1. Install the Gem
+
+Add to your Gemfile and run `bundle install`:
+
+```ruby
+gem 'rails-index-now'
+```
+
+### 2. Generate Configuration
 
 ```bash
 rails generate index_now:install
 ```
 
-This creates `config/initializers/index_now.rb`. Configure your IndexNow settings:
+### 3. Configure Your API Key
+
+Get your free API key from [Bing IndexNow](https://www.bing.com/indexnow/getstarted) and add it to your environment:
+
+```bash
+# .env or your environment
+INDEXNOW_API_KEY=your_api_key_here
+```
+
+**That's it!** The engine automatically:
+- ✅ Serves your API key at `/your_api_key_here.txt` (for IndexNow verification)  
+- ✅ Handles all routing and controller logic
+- ✅ Configures sensible defaults for all environments
+
+### Configuration Options
+
+The generator creates `config/initializers/index_now.rb` with these options:
 
 ```ruby
 Rails::Index::Now.configure do |config|
   # Required: Your IndexNow API key
-  # Get one free at https://www.indexnow.org/
-  config.api_key = ENV['INDEXNOW_API_KEY']
+  config.api_key = ENV.fetch("INDEXNOW_API_KEY", nil)
+  
+  # Required: Key file name (automatically set from your API key)
+  config.key_file_name = "#{ENV.fetch('INDEXNOW_API_KEY', 'your-api-key')}.txt"
   
   # Optional: Set a specific host for all submissions
-  # If not set, the gem will extract the host from submitted URLs
-  config.host = "yourdomain.com"
+  # config.host = "yourdomain.com"
   
-  # Optional: Disable IndexNow in specific environments
-  # Recommended for test and development environments
+  # Optional: Disable IndexNow in specific environments  
   config.disabled = Rails.env.test? || Rails.env.development?
   
   # Optional: Set a custom logger
-  # Defaults to Rails.logger
-  config.logger = Rails.logger
+  # config.logger = Rails.logger
 end
 ```
-
-### Getting Your IndexNow API Key
-
-1. Visit [IndexNow.org](https://www.indexnow.org/)
-2. Generate a free API key
-3. Add the key to your environment variables or Rails credentials
 
 ## Usage
 
@@ -92,12 +116,12 @@ Rails::Index::Now.submit([
 ])
 ```
 
-### Background Processing (Recommended)
+### Background Processing (Optional)
 
-For production applications, use background jobs to avoid blocking web requests:
+For production applications, use background jobs to avoid blocking web requests. **Note: This requires ActiveJob to be available in your application.**
 
 ```ruby
-# Submit URLs asynchronously using ActiveJob
+# Submit URLs asynchronously using ActiveJob (requires ActiveJob)
 Rails::Index::Now.submit_async("https://yourdomain.com/articles/123")
 
 Rails::Index::Now.submit_async([
@@ -106,26 +130,23 @@ Rails::Index::Now.submit_async([
 ])
 ```
 
-The gem works seamlessly with any ActiveJob backend (Sidekiq, SolidQueue, GoodJob, etc.).
+The gem works seamlessly with any ActiveJob backend (Sidekiq, SolidQueue, GoodJob, etc.) when ActiveJob is available.
 
-### Real-World Rails Integration
+### Rails Model Integration
 
-Here's how to integrate IndexNow with your Rails models for automatic indexing:
+The magic happens when you integrate IndexNow with your Rails models. Here's a complete example:
 
 ```ruby
 class Article < ApplicationRecord
-  # Submit to IndexNow after creating or updating articles
+  # Automatically notify search engines when articles are created or updated
   after_commit :submit_to_index_now, on: [:create, :update]
-  
-  # Also submit when articles are published
-  after_commit :submit_to_index_now, if: :saved_change_to_published_at?
   
   private
   
   def submit_to_index_now
     return unless published? && Rails.env.production?
     
-    # Submit asynchronously to avoid blocking the web request
+    # The engine handles everything - just submit the URL!
     Rails::Index::Now.submit_async(article_url)
   end
   
@@ -138,12 +159,18 @@ class Article < ApplicationRecord
 end
 ```
 
+**What happens automatically:**
+1. 🔥 Your article gets saved 
+2. 🚀 `after_commit` triggers IndexNow submission
+3. 🎯 Search engines are notified within seconds
+4. ✅ Your content appears in search results faster
+
 ### Advanced Usage
 
-For more complex scenarios, you can also use the job directly:
+For more complex scenarios, you can also use the job directly (requires ActiveJob):
 
 ```ruby
-# Use the provided ActiveJob directly
+# Use the provided ActiveJob directly (requires ActiveJob)
 Rails::Index::Now::SubmitJob.perform_later([
   "https://yourdomain.com/page1",
   "https://yourdomain.com/page2"
@@ -152,6 +179,8 @@ Rails::Index::Now::SubmitJob.perform_later([
 # Or perform immediately (not recommended for web requests)
 Rails::Index::Now::SubmitJob.perform_now(["https://yourdomain.com/page"])
 ```
+
+**Note:** If ActiveJob is not available, use the synchronous `submit` method instead.
 
 ### Error Handling
 
@@ -169,22 +198,25 @@ Rails::Index::Now.submit("invalid-url")
 
 ## Framework Compatibility
 
-This gem is designed specifically for Rails applications and requires:
+This Rails Engine requires:
 
-- **Rails 6.0+** (for ActiveJob support)
+- **Rails 5.0+** (for Rails Engine support)
 - **Ruby 2.7+**
+- **ActiveJob** (optional, only needed for `submit_async` functionality)
 
-The gem automatically integrates with your existing Rails infrastructure:
+The engine automatically integrates with your Rails application:
 
-- **ActiveJob**: Works with any ActiveJob backend (Sidekiq, SolidQueue, etc.)
-- **Logging**: Uses Rails.logger by default
-- **Environment Awareness**: Easy to disable in development/test environments
-- **Rails Generators**: Includes installation generator for easy setup
+- **🔄 Automatic Routing**: No need to manually add routes - the engine handles it
+- **🎛️ Controller Integration**: Built-in controller serves API key verification file
+- **⚡ ActiveJob**: Optional - enables `submit_async` method with any backend (Sidekiq, SolidQueue, etc.)
+- **📝 Smart Logging**: Uses Rails.logger with helpful [IndexNow] prefixes
+- **🌍 Environment Awareness**: Easy to disable in development/test environments
+- **🛠️ Rails Generators**: One-command setup with `rails generate index_now:install`
 
 ## Performance Considerations
 
-- **Asynchronous by Design**: The `submit_async` method queues jobs to avoid blocking web requests
-- **Lightweight**: Zero external dependencies beyond Rails
+- **Asynchronous by Design**: The `submit_async` method queues jobs to avoid blocking web requests (when ActiveJob is available)
+- **Lightweight**: Zero runtime dependencies - uses only Ruby standard library
 - **Efficient**: Batches multiple URLs in single API calls when possible
 - **Fault Tolerant**: Gracefully handles network failures and API errors
 

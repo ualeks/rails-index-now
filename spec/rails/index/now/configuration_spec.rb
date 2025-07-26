@@ -48,6 +48,32 @@ RSpec.describe Rails::Index::Now::Configuration do
     end
   end
 
+  describe "#engine_valid?" do
+    it "returns false when api_key is nil" do
+      config.api_key = nil
+      config.key_file_name = "test.txt"
+      expect(config.engine_valid?).to be false
+    end
+
+    it "returns false when key_file_name is nil" do
+      config.api_key = "test-key"
+      config.key_file_name = nil
+      expect(config.engine_valid?).to be false
+    end
+
+    it "returns false when key_file_name is empty" do
+      config.api_key = "test-key"
+      config.key_file_name = ""
+      expect(config.engine_valid?).to be false
+    end
+
+    it "returns true when both api_key and key_file_name are set" do
+      config.api_key = "test-key"
+      config.key_file_name = "test-key.txt"
+      expect(config.engine_valid?).to be true
+    end
+  end
+
   describe "attribute accessors" do
     it "allows setting and getting api_key" do
       config.api_key = "my-api-key"
@@ -68,6 +94,11 @@ RSpec.describe Rails::Index::Now::Configuration do
       custom_logger = double("logger")
       config.logger = custom_logger
       expect(config.logger).to eq(custom_logger)
+    end
+
+    it "allows setting and getting key_file_name" do
+      config.key_file_name = "my-key.txt"
+      expect(config.key_file_name).to eq("my-key.txt")
     end
   end
 end

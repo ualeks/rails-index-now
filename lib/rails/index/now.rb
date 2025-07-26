@@ -4,7 +4,7 @@ require_relative "now/version"
 require_relative "now/configuration"
 require_relative "now/client"
 require_relative "now/submit_job" if defined?(ActiveJob::Base)
-require_relative "now/railtie" if defined?(Rails::Railtie)
+require_relative "now/railtie" if defined?(Rails::Engine)
 
 module Rails
   module Index
