@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    rails-index-now (0.1.0)
+    rails-index-now (0.1.1)
 
 GEM
   remote: https://rubygems.org/
