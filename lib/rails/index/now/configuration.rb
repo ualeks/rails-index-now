@@ -10,7 +10,7 @@ module Rails
           @api_key = nil
           @host = nil
           @disabled = false
-          @logger = defined?(::Rails) ? ::Rails.logger : Logger.new(STDOUT)
+          @logger = default_logger
         end
         
         def disabled?
@@ -19,6 +19,17 @@ module Rails
         
         def valid?
           !api_key.nil? && !api_key.empty?
+        end
+        
+        private
+        
+        def default_logger
+          if defined?(::Rails) && ::Rails.respond_to?(:logger) && ::Rails.logger
+            ::Rails.logger
+          else
+            require 'logger'
+            Logger.new(STDOUT)
+          end
         end
       end
     end

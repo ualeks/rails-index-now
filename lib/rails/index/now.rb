@@ -3,7 +3,7 @@
 require_relative "now/version"
 require_relative "now/configuration"
 require_relative "now/client"
-require_relative "now/submit_job"
+require_relative "now/submit_job" if defined?(ActiveJob::Base)
 require_relative "now/railtie" if defined?(Rails::Railtie)
 
 module Rails
@@ -29,7 +29,11 @@ module Rails
         end
         
         def submit_async(urls)
-          SubmitJob.perform_later(urls)
+          if defined?(SubmitJob)
+            SubmitJob.perform_later(urls)
+          else
+            raise "ActiveJob is not available. Please ensure ActiveJob is loaded before using submit_async."
+          end
         end
       end
     end

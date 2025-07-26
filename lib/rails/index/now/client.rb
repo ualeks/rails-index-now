@@ -26,6 +26,8 @@ module Rails
           return if url_list.empty?
           
           host = determine_host(url_list.first)
+          return nil if host.nil?
+          
           payload = build_payload(host, url_list)
           
           make_request(payload)
