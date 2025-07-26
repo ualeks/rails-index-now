@@ -26,7 +26,7 @@ RSpec.describe Rails::Index::Now do
         expect(config).to be_a(Rails::Index::Now::Configuration)
         config.api_key = "test-key"
       end
-      
+
       expect(Rails::Index::Now.configuration.api_key).to eq("test-key")
     end
   end
@@ -47,10 +47,10 @@ RSpec.describe Rails::Index::Now do
     it "resets the configuration" do
       Rails::Index::Now.configure { |c| c.api_key = "test" }
       old_config = Rails::Index::Now.configuration
-      
+
       Rails::Index::Now.reset_configuration!
       new_config = Rails::Index::Now.configuration
-      
+
       expect(new_config).not_to eq(old_config)
       expect(new_config.api_key).to be_nil
     end
@@ -61,7 +61,7 @@ RSpec.describe Rails::Index::Now do
       allow(Rails::Index::Now).to receive(:configuration).and_return(test_config)
       client_instance = instance_double(Rails::Index::Now::Client)
       allow(Rails::Index::Now::Client).to receive(:new).and_return(client_instance)
-      
+
       expect(client_instance).to receive(:submit).with("https://example.com")
       Rails::Index::Now.submit("https://example.com")
     end

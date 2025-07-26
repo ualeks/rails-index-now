@@ -14,7 +14,7 @@ RSpec.describe Rails::Index::Now::Configuration do
     it "sets Rails.logger when Rails is defined" do
       rails_logger = double("logger")
       stub_const("Rails", double(logger: rails_logger))
-      
+
       new_config = described_class.new
       expect(new_config.logger).to eq(rails_logger)
     end

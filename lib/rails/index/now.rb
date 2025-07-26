@@ -10,30 +10,30 @@ module Rails
   module Index
     module Now
       class Error < StandardError; end
-      
+
       class << self
         def configure
           yield(configuration)
         end
-        
+
         def configuration
           @configuration ||= Configuration.new
         end
-        
+
         def reset_configuration!
           @configuration = nil
         end
-        
+
         def submit(urls)
           Client.new.submit(urls)
         end
-        
+
         def submit_async(urls)
-          if defined?(SubmitJob)
-            SubmitJob.perform_later(urls)
-          else
+          unless defined?(SubmitJob)
             raise "ActiveJob is not available. Please ensure ActiveJob is loaded before using submit_async."
           end
+
+          SubmitJob.perform_later(urls)
         end
       end
     end

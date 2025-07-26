@@ -5,7 +5,7 @@ module Rails
     module Now
       class SubmitJob < ActiveJob::Base
         queue_as :default
-        
+
         def perform(urls)
           Client.new.submit(urls)
         end

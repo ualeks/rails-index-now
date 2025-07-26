@@ -35,7 +35,8 @@ RSpec.describe Rails::Index::Now::Client do
       before { config.api_key = nil }
 
       it "logs error and returns false" do
-        expect(config.logger).to receive(:error).with("[IndexNow] IndexNow configuration is invalid. API key is required.")
+        expect(config.logger).to receive(:error)
+          .with("[IndexNow] IndexNow configuration is invalid. API key is required.")
         expect(client.submit("https://example.com/page")).to be false
       end
     end
@@ -51,7 +52,7 @@ RSpec.describe Rails::Index::Now::Client do
 
         it "constructs correct payload for single URL" do
           client.submit("https://example.com/page")
-          
+
           expect(WebMock).to have_requested(:post, "https://api.indexnow.org/indexnow")
             .with(body: {
               host: "example.com",
@@ -62,7 +63,7 @@ RSpec.describe Rails::Index::Now::Client do
 
         it "constructs correct payload for multiple URLs" do
           client.submit(test_urls)
-          
+
           expect(WebMock).to have_requested(:post, "https://api.indexnow.org/indexnow")
             .with(body: {
               host: "example.com",
@@ -74,21 +75,21 @@ RSpec.describe Rails::Index::Now::Client do
         it "uses configured host when provided" do
           config.host = "custom-host.com"
           client.submit("https://example.com/page")
-          
+
           expect(WebMock).to have_requested(:post, "https://api.indexnow.org/indexnow")
             .with(body: hash_including(host: "custom-host.com"))
         end
 
         it "extracts host from URL when not configured" do
           client.submit("https://different.com/page")
-          
+
           expect(WebMock).to have_requested(:post, "https://api.indexnow.org/indexnow")
             .with(body: hash_including(host: "different.com"))
         end
 
         it "sends correct headers" do
           client.submit("https://example.com/page")
-          
+
           expect(WebMock).to have_requested(:post, "https://api.indexnow.org/indexnow")
             .with(headers: { "Content-Type" => "application/json" })
         end
@@ -161,7 +162,7 @@ RSpec.describe Rails::Index::Now::Client do
           expect(config.logger).to receive(:error).with(/Invalid URL provided.*Error:/)
           expect(client.submit("http://[invalid")).to be_nil
         end
-        
+
         it "handles URLs with no host gracefully" do
           expect(client.submit("not-a-valid-url")).to be_nil
         end
@@ -170,7 +171,8 @@ RSpec.describe Rails::Index::Now::Client do
           stub_request(:post, "https://api.indexnow.org/indexnow")
             .to_raise(StandardError.new("Something went wrong"))
 
-          expect(config.logger).to receive(:error).with("[IndexNow] Unexpected error when submitting to IndexNow: Something went wrong")
+          expect(config.logger).to receive(:error)
+            .with("[IndexNow] Unexpected error when submitting to IndexNow: Something went wrong")
           expect(client.submit("https://example.com/page")).to be false
         end
 
