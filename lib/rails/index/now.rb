@@ -3,6 +3,8 @@
 require_relative "now/version"
 require_relative "now/configuration"
 require_relative "now/client"
+require_relative "now/submit_job"
+require_relative "now/railtie" if defined?(Rails::Railtie)
 
 module Rails
   module Index
@@ -24,6 +26,10 @@ module Rails
         
         def submit(urls)
           Client.new.submit(urls)
+        end
+        
+        def submit_async(urls)
+          SubmitJob.perform_later(urls)
         end
       end
     end
