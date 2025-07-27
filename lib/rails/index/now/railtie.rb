@@ -9,7 +9,7 @@ module Rails
         isolate_namespace Rails::Index::Now
 
         generators do
-          require_relative "generators/install_generator"
+          require "generators/index_now/install_generator"
         end
 
         initializer "rails_index_now.add_routes" do |app|
