@@ -14,6 +14,14 @@ module Rails
           @key_file_name = nil
         end
 
+        def api_key
+          @api_key || ENV['INDEXNOW_API_KEY']
+        end
+
+        def key_file_name
+          @key_file_name || (ENV['INDEXNOW_API_KEY'] ? "#{ENV['INDEXNOW_API_KEY']}.txt" : nil)
+        end
+
         def disabled?
           @disabled
         end

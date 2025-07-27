@@ -4,14 +4,13 @@
 # See https://github.com/your-username/rails-index-now for full documentation
 
 Rails::Index::Now.configure do |config|
-  # Required: Your IndexNow API key
-  # You can get one from https://www.bing.com/indexnow/getstarted
-  config.api_key = ENV.fetch("INDEXNOW_API_KEY", nil)
-
-  # Required: Key file name for IndexNow verification
-  # This should be "YOUR_API_KEY.txt" (replace YOUR_API_KEY with your actual key)
-  # The gem will automatically serve this file at /YOUR_API_KEY.txt
-  config.key_file_name = "#{ENV.fetch("INDEXNOW_API_KEY", "your-api-key")}.txt"
+  # The gem automatically reads INDEXNOW_API_KEY from ENV
+  # You can override it here if needed:
+  # config.api_key = "your-custom-key"
+  
+  # The gem automatically sets key_file_name to "#{ENV['INDEXNOW_API_KEY']}.txt"
+  # You can override it here if needed:
+  # config.key_file_name = "custom-filename.txt"
 
   # Optional: Set a specific host for all submissions
   # If not set, the gem will extract the host from the submitted URLs
@@ -25,3 +24,15 @@ Rails::Index::Now.configure do |config|
   # Defaults to Rails.logger if available, otherwise STDOUT
   # config.logger = Rails.logger
 end
+
+# IMPORTANT: Add this to your config/routes.rb file:
+#
+# Option A (recommended - serves key at /your_api_key.txt):
+# Rails.application.routes.draw do
+#   mount Rails::Index::Now::Engine, at: "/"
+# end
+#
+# Option B (if you have routing conflicts):
+# Rails.application.routes.draw do
+#   mount Rails::Index::Now::Engine, at: "/indexnow"
+# end

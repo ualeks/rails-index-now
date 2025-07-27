@@ -21,9 +21,9 @@ Traditional search engine indexing relies on crawlers periodically visiting your
 
 ### Why This Rails Engine?
 
-- **🚀 Plug-and-Play**: No manual controller or route setup required
-- **🔐 Automatic Verification**: The engine automatically serves your API key file at the correct URL
-- **⚡ Zero Configuration**: Just add the gem, run the generator, and you're ready
+- **🚀 Easy Setup**: Pre-built controller and simple route configuration
+- **🔐 Verification Ready**: Built-in controller serves your API key file for IndexNow verification
+- **⚡ Minimal Configuration**: Just add the gem, run generator, add one route, and you're ready
 - **🛡️ Production Ready**: Built-in error handling, logging, and environment controls
 
 ## Installation
@@ -71,10 +71,39 @@ Get your free API key from [Bing IndexNow](https://www.bing.com/indexnow/getstar
 INDEXNOW_API_KEY=your_api_key_here
 ```
 
-**That's it!** The engine automatically:
-- ✅ Serves your API key at `/your_api_key_here.txt` (for IndexNow verification)  
-- ✅ Handles all routing and controller logic
-- ✅ Configures sensible defaults for all environments
+### 4. Mount the Engine
+
+Add this to your `config/routes.rb` file:
+
+**Option A: Mount at root (recommended):**
+```ruby
+Rails.application.routes.draw do
+  mount Rails::Index::Now::Engine, at: "/"
+  
+  # ... your other routes
+end
+```
+
+**Option B: Mount at a path (if you have conflicts):**
+```ruby
+Rails.application.routes.draw do
+  mount Rails::Index::Now::Engine, at: "/indexnow"
+  
+  # ... your other routes
+end
+```
+
+**Note:** 
+- Option A serves your key at `/your_api_key.txt` (IndexNow standard)
+- Option B serves your key at `/indexnow/your_api_key.txt` 
+- The engine only responds to API key files (alphanumeric + hyphens/underscores ending in `.txt`)
+- Files like `/robots.txt`, `/sitemap.txt` are not affected
+
+**That's it!** The engine automatically provides:
+- ✅ API key verification at `/your_api_key.txt` (IndexNow requirement)
+- ✅ Built-in controller with comprehensive error handling  
+- ✅ Secure validation (only serves configured key file)
+- ✅ Sensible defaults for all environments
 
 ### Configuration Options
 
@@ -204,10 +233,10 @@ This Rails Engine requires:
 - **Ruby 2.7+**
 - **ActiveJob** (optional, only needed for `submit_async` functionality)
 
-The engine automatically integrates with your Rails application:
+The engine integrates with your Rails application:
 
-- **🔄 Automatic Routing**: No need to manually add routes - the engine handles it
 - **🎛️ Controller Integration**: Built-in controller serves API key verification file
+- **🔄 Simple Routing**: One-line route addition to connect IndexNow verification
 - **⚡ ActiveJob**: Optional - enables `submit_async` method with any backend (Sidekiq, SolidQueue, etc.)
 - **📝 Smart Logging**: Uses Rails.logger with helpful [IndexNow] prefixes
 - **🌍 Environment Awareness**: Easy to disable in development/test environments
