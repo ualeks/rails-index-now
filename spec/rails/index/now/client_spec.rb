@@ -100,7 +100,15 @@ RSpec.describe Rails::Index::Now::Client do
           stub_request(:post, "https://api.indexnow.org/indexnow")
             .to_return(status: 200)
 
-          expect(config.logger).to receive(:info).with("[IndexNow] Successfully submitted 1 URLs to IndexNow")
+          expect(config.logger).to receive(:info).with("[IndexNow] Successfully submitted 1 URLs to IndexNow (200)")
+          expect(client.submit("https://example.com/page")).to be true
+        end
+
+        it "returns true and logs success on 202 response" do
+          stub_request(:post, "https://api.indexnow.org/indexnow")
+            .to_return(status: 202)
+
+          expect(config.logger).to receive(:info).with("[IndexNow] Successfully submitted 1 URLs to IndexNow (202)")
           expect(client.submit("https://example.com/page")).to be true
         end
 
@@ -108,7 +116,7 @@ RSpec.describe Rails::Index::Now::Client do
           stub_request(:post, "https://api.indexnow.org/indexnow")
             .to_return(status: 200)
 
-          expect(config.logger).to receive(:info).with("[IndexNow] Successfully submitted 2 URLs to IndexNow")
+          expect(config.logger).to receive(:info).with("[IndexNow] Successfully submitted 2 URLs to IndexNow (200)")
           expect(client.submit(test_urls)).to be true
         end
       end

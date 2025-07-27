@@ -86,8 +86,8 @@ module Rails
         end
 
         def process_response(response, url_count)
-          if response.code == "200"
-            log_info("Successfully submitted #{url_count} URLs to IndexNow")
+          if ["200", "202"].include?(response.code)
+            log_info("Successfully submitted #{url_count} URLs to IndexNow (#{response.code})")
             true
           else
             log_error("IndexNow API returned #{response.code}: #{response.body}")
